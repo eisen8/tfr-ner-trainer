@@ -10,6 +10,7 @@ from common.constants import Constants as C
 
 
 def add_indices(data):
+    fail = False
     for entry in data:
         filename = entry["filename"]
         used_indices = set()  # Track already used character positions
@@ -26,7 +27,8 @@ def add_indices(data):
             if start == -1:
                 print(entry)
                 #raise Exception(f"Could not find {text} in {filename}")
-                print(f"Could not find {text} in {filename}")
+                print(f"Could not find '{text}' in '{filename}'")
+                fail = True
 
             end = start + len(text)
             annotation["start"] = start
@@ -35,6 +37,8 @@ def add_indices(data):
             # Mark this range as used
             used_indices.update(range(start, end))
 
+    if fail:
+        raise Exception("Error in annotations")
     return data
 
 
@@ -86,6 +90,8 @@ if __name__ == "__main__":
     #     json.dump(new_data, f, indent=4)
 
     # Config
+    model_name = "trained_ner_model2"
+
     if spacy.prefer_gpu():
         spacy.require_gpu()  # Use GPU if available
         device = 0  # First GPU
@@ -111,6 +117,7 @@ if __name__ == "__main__":
     _cursor = _conn.cursor()
     _cursor.execute("SELECT annotation_json FROM annotations WHERE annotation_json IS NOT NULL")
     rows = [row[0] for row in _cursor.fetchall()]
+    print(f"Found {len(rows)} of training data")
     for row in rows:
         j = json.loads(row)
         data.append(j)
@@ -143,5 +150,5 @@ if __name__ == "__main__":
             print(f"Epoch {epoch + 1}, Loss: {losses}")
 
     # Save the trained model
-    nlp.to_disk("trained_ner_model")
-    print("Training complete. Model saved to 'trained_ner_model'.")
+    nlp.to_disk(model_name)
+    print(f"Training complete. Model saved to '{model_name}'.")

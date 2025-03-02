@@ -63,13 +63,15 @@ def verify_indices(data):
 
 if __name__ == "__main__":
     # Load trained model
-    nlp = spacy.load("en_core_web_sm")
+    # nlp = spacy.load("en_core_web_sm")
+    nlp = spacy.blank("en")
     nlp.tokenizer = custom_tokenizer(nlp)
 
     # Load training data
     # with open(C.TRAINING_DATA_FOLDER_PATH / "response_0_updated.json", "r", encoding="utf-8") as f:
     #   data = json.load(f)
     data = []
+    print(C.DB_FILE_PATH.resolve())
     _conn = sqlite3.connect(str(C.DB_FILE_PATH))
     _conn.row_factory = sqlite3.Row  # Treat rows as dictionaries rather than tuples
     _cursor = _conn.cursor()
