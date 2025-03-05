@@ -5,10 +5,12 @@ from spacy.util import compile_infix_regex
 infix_patterns = [
     r'\s+',        # Whitespace
     r'-',          # Dash
+    r'(?<=\d)[xX](?=\d)',  # 1x2
+    r'(?<=\d)[vV](?=\d)',  # 1v2
 ]
 
-prefix_patterns = [r'\[', r'\(']
-suffix_patterns = [r'\]', r'\)']
+prefix_patterns = [r'\[', r'\(', r'{', r',', r'[sS](?=\d+)', r'[eE](?=\d+)', r'E[pP](?=\d+)', r'[pP](?=\d+)', r'Part(?=\d+)', r'BD']
+suffix_patterns = [r'\]', r'\)', r'}', r',', r'th', r'rd', r'nd']
 
 suffix_re = compile_infix_regex(suffix_patterns)
 prefix_re = compile_infix_regex(prefix_patterns)
