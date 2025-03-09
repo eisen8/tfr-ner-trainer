@@ -1,9 +1,12 @@
+import time
+
 import spacy
 from spacy.training import offsets_to_biluo_tags
 
 from tokenizer import custom_tokenizer
 
 if __name__ == "__main__":
+    start = time.perf_counter()  # Start high-resolution timer
     test_data = [
         "Space Force S01 E02 720p NF WEBRip x264 GalaxyTV",
         "Space Force 1x2 720p NF WEBRip x264 GalaxyTV",
@@ -18,8 +21,11 @@ if __name__ == "__main__":
 
     nlp = spacy.load("tfr-model")
     nlp.tokenizer = custom_tokenizer(nlp)
+    model_loaded_time = time.perf_counter()  # Start high-resolution timer
+    print(f"Elapsed model_load time: {model_loaded_time - start:.9f} seconds")
 
     for text in test_data:
+        start_text = time.perf_counter()  # Start high-resolution timer
         doc = nlp(text)
         # Access tokens, named entities, and parts of speech
         print(f"---- {text}")
@@ -28,5 +34,10 @@ if __name__ == "__main__":
         print(f"Tokens {tokens}")
         print(f"Entities {entities}")
 
-        #biluo_tags = offsets_to_biluo_tags(doc, entitites)
-        #print(f"BILOU Tags: {biluo_tags}")
+        # biluo_tags = offsets_to_biluo_tags(doc, entitites)
+        # print(f"BILOU Tags: {biluo_tags}")
+        end_text = time.perf_counter()  # Start high-resolution timer
+        print(f"Elapsed text time: {end_text - start_text:.9f} seconds")
+
+    end = time.perf_counter()  # Start high-resolution timer
+    print(f"Elapsed total time: {end - start:.9f} seconds")

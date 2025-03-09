@@ -1,9 +1,10 @@
 import json
 import re
-import sqlite3
+import time
 
-from src.trf_ner_trainer.model_trainer import tprint
-from common.constants import Constants as C
+from common.logger import Logger as L
+from common.database import Database as DB
+from src.tfr_ner_trainer.common.time_helper import format_time
 
 
 def add_indices(data):
@@ -22,9 +23,8 @@ def add_indices(data):
             start = next((m for m in matches if m not in used_indices), -1)
 
             if start == -1:
-                tprint(entry)
-                #raise Exception(f"Could not find {text} in {filename}")
-                tprint(f"Could not find '{text}' in '{filename}'")
+                L.info(entry)
+                # raise Exception(f"Could not find {text} in {filename}")
                 fail.append(f"Could not find '{text}' in '{filename}'")
 
             end = start + len(text)
@@ -55,13 +55,11 @@ def verify_indices(data):
 
             extracted_text = filename[start:end]
             if extracted_text != text:
-                tprint(f"Invalid annotation: '{text}' does not match extracted text '{extracted_text}' (from indices {start}-{end}) for {filename}")
                 fail.append(f"Invalid annotation: '{text}' does not match extracted text '{extracted_text}' (from indices {start}-{end}) for {filename}")
 
             # Check for overlap
             overlap = any(index in used_indices for index in range(start, end))
             if overlap:
-                tprint(f"Overlap detected: Annotation '{text}' overlaps with a previous annotation (from indices {start}-{end}) for {filename}")
                 fail.append(f"Overlap detected: Annotation '{text}' overlaps with a previous annotation (from indices {start}-{end}) for {filename}")
 
             used_indices.update(range(start, end))
@@ -69,15 +67,13 @@ def verify_indices(data):
     if len(fail) > 0:
         raise Exception(f"Error in annotations - {fail}")
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
+    # -- SCRIPT --
+    start_time = time.time()
     data = []
-    _conn = sqlite3.connect(str(C.DB_FILE_PATH))
-    _conn.row_factory = sqlite3.Row  # Treat rows as dictionaries rather than tuples
-    _cursor = _conn.cursor()
-    _cursor.execute("SELECT annotation_json FROM annotations WHERE annotation_json IS NOT NULL")
-    rows = [row[0] for row in _cursor.fetchall()]
-    tprint(f"Found {len(rows)} of training data")
+    rows = DB.get_annotated_files()
+    L.info(f"Found {len(rows)} of training data")
     for row in rows:
         j = json.loads(row)
         data.append(j)
@@ -88,5 +84,12 @@ if __name__ == "__main__":
     for entry in data:
         filename = entry["filename"]
         json_str = json.dumps(entry, indent=4)
-        _cursor.execute("UPDATE annotations SET annotation_json_indiced = ? WHERE filename = ?", (json_str, filename))
-        _conn.commit()
+        DB.update_indiced_annotation(filename, json_str)
+
+    # Summary
+    L.info(f"---- Script has finished. ----")
+    L.info(f"Run time: {format_time(time.time() - start_time)}")
+    L.info(f"Results: ")
+    L.info(f"{rows} rows processed.")
+    L.info(f'{L.num_errors} errors occurred')
+    L.print_error_messages()
