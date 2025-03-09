@@ -66,5 +66,5 @@ if __name__ == "__main__":
     L.info(f"{len(rows)} Rows Processed.")
     L.info(f"{len(combined)} File Names added")
     L.info(f"{annotation_rows_count} Actual rows added to annotations database")
-    L.info(f'{L.num_errors} errors occurred')
+    L.info(f'{L.num_errors} errors occurred:')
     L.print_error_messages()

@@ -31,5 +31,5 @@ if __name__ == "__main__":
     L.info(f"Results: ")
     L.info(f"{len(rows)} Rows Processed.")
     L.info(f"{assigned_t} assigned T and {assigned_e} assigned E")
-    L.info(f'{L.num_errors} errors occurred')
+    L.info(f'{L.num_errors} errors occurred:')
     L.print_error_messages()

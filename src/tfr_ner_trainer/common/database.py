@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from constants import Constants as C
+from common.constants import Constants as C
 
 
 class Database:
@@ -32,7 +32,8 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("UPDATE links SET training_group = ? WHERE id = ?", (training_group, id))
+            cursor = conn.cursor()
+            cursor.execute("UPDATE links SET training_group = ? WHERE id = ?", (training_group, id))
             conn.commit()
         finally:
             Database._close(conn)
@@ -46,8 +47,9 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("SELECT id FROM links WHERE file_names IS NOT NULL and training_group IS NULL")
-            return conn.cursor().fetchall()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM links WHERE file_names IS NOT NULL and training_group IS NULL")
+            return cursor.fetchall()
         finally:
             Database._close(conn)
 
@@ -62,8 +64,9 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("SELECT file_names FROM links WHERE training_group = ? and file_names IS NOT NULL", (training_group,))
-            return conn.cursor().fetchall()
+            cursor = conn.cursor()
+            cursor.execute("SELECT file_names FROM links WHERE training_group = ? and file_names IS NOT NULL", (training_group,))
+            return cursor.fetchall()
         finally:
             Database._close(conn)
 
@@ -77,8 +80,9 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("SELECT filename FROM annotations WHERE annotation_json IS NULL LIMIT ?", (n,))
-            rows = [row[0] for row in conn.cursor().fetchall()]
+            cursor = conn.cursor()
+            cursor.execute("SELECT filename FROM annotations WHERE annotation_json IS NULL LIMIT ?", (n,))
+            rows = [row[0] for row in cursor.fetchall()]
             return rows
         finally:
             Database._close(conn)
@@ -92,8 +96,9 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("SELECT COUNT(filename) FROM annotations WHERE annotation_json IS NULL")
-            count = conn.cursor().fetchone()[0]
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(filename) FROM annotations WHERE annotation_json IS NULL")
+            count = cursor.fetchone()[0]
             return count
         finally:
             Database._close(conn)
@@ -106,8 +111,9 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("SELECT annotation_json FROM annotations WHERE annotation_json IS NOT NULL")
-            return [row[0] for row in conn.cursor().fetchall()]
+            cursor = conn.cursor()
+            cursor.execute("SELECT annotation_json FROM annotations WHERE annotation_json IS NOT NULL")
+            return [row[0] for row in cursor.fetchall()]
         finally:
             Database._close(conn)
 
@@ -119,7 +125,8 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("UPDATE annotations SET annotation_json_indiced = ? WHERE filename = ?", (indiced_annotation, filename))
+            cursor = conn.cursor()
+            cursor.execute("UPDATE annotations SET annotation_json_indiced = ? WHERE filename = ?", (indiced_annotation, filename))
             conn.commit()
         finally:
             Database._close(conn)
@@ -135,10 +142,11 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
+            cursor = conn.cursor()
             filenames = [(filename,) for filename in filenames]  # ExecuteMany expects a list of tuples
-            conn.cursor().executemany("INSERT OR IGNORE INTO annotations (filename) VALUES (?)", filenames)
+            cursor.executemany("INSERT OR IGNORE INTO annotations (filename) VALUES (?)", filenames)
             conn.commit()
-            return conn.cursor().rowcount
+            return cursor.rowcount
         finally:
             Database._close(conn)
 
@@ -153,8 +161,23 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("UPDATE annotations SET annotation_json = ? WHERE filename = ?", (annotation, filename))
+            cursor = conn.cursor()
+            cursor.execute("UPDATE annotations SET annotation_json = ? WHERE filename = ?", (annotation, filename))
             conn.commit()
+        finally:
+            Database._close(conn)
+
+    @staticmethod
+    def get_indiced_annotations() -> list[str]:
+        """ Returns all indiced annotations
+        :return: List of annotation_json_indiced
+        """
+        conn = None
+        try:
+            conn = Database._connect()
+            cursor = conn.cursor()
+            cursor.execute("SELECT annotation_json_indiced FROM annotations WHERE annotation_json_indiced IS NOT NULL")
+            return [row[0] for row in cursor.fetchall()]
         finally:
             Database._close(conn)
 
@@ -167,7 +190,8 @@ class Database:
         conn = None
         try:
             conn = Database._connect()
-            conn.cursor().execute("UPDATE annotations SET annotation_json = NULL WHERE annotation_json IS NOT NULL")
+            cursor = conn.cursor()
+            cursor.execute("UPDATE annotations SET annotation_json = NULL WHERE annotation_json IS NOT NULL")
             conn.commit()
         finally:
             Database._close(conn)

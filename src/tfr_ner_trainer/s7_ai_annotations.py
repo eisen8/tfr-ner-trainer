@@ -1,7 +1,6 @@
 import json
 import os
 import time
-import traceback
 
 from dotenv import load_dotenv
 
@@ -44,7 +43,7 @@ if __name__ == "__main__":
     file_names_processed = 0
     total_filenames_to_annotate = DB.get_count_of_files_to_annotate()
     L.info(f"{total_filenames_to_annotate} file to annotate")
-    while index < max_requests and L.num_errors() < max_fails:
+    while index < max_requests and L.num_errors < max_fails:
         try:
             filenames = DB.get_files_to_annotate(data_input_chunk_size)
             if not filenames:
@@ -104,6 +103,6 @@ if __name__ == "__main__":
     L.info(f"{file_names_processed} FileNames Processed.")
     L.info(f"{index} Responses handled")
     L.info(f"{total_tokens} Tokens used")
-    L.info(f'{L.num_errors} errors occurred')
+    L.info(f'{L.num_errors} errors occurred:')
     L.print_error_messages()
 

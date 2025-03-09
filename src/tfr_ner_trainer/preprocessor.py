@@ -21,15 +21,15 @@ def preprocessor(s: str) -> str:
     s = re.sub(r'_', ' ', s)
 
     # Remove dashes
-    s = re.sub(r'-([\[\(\]\)])', '\g<1>', s)  # dashes before brackets
-    s = re.sub(r'([\[\(\]\)])-', '\g<1>', s)  # dash after brackets
+    s = re.sub(r'-([\[\(\]\)])', r'\g<1>', s)  # dashes before brackets
+    s = re.sub(r'([\[\(\]\)])-', r'\g<1>', s)  # dash after brackets
     s = re.sub(r'(?<=[\w\[\]\(\)])(-)(?=[\w\[\]\(\)]*$)', ' ', s)  # dash at end such as x265-GalaxyTV or x264-mSD[eztv]
 
     # Add whitespace before non-prefix open brackets/parenthesis
-    s = re.sub(r'(?<=[a-zA-Z0-9\]\)])[\[\(]', ' \g<0>', s)
+    s = re.sub(r'(?<=[a-zA-Z0-9\]\)])[\[\(]', r' \g<0>', s)
 
     # Add whitespace after non-suffix closed brackets/parenthesis
-    s = re.sub(r'[\]\)](?=[a-zA-Z0-9\[\(])', '\g<0> ', s)
+    s = re.sub(r'[\]\)](?=[a-zA-Z0-9\[\(])', r'\g<0> ', s)
 
     # We allow '-', this is just to normalize them with either no spaces or spaces on both sides.
     # Without this "x264-[yts]" would become "x264- yts". This normalizes it to "x264 - yts"

@@ -90,6 +90,6 @@ if __name__ == "__main__":
     L.info(f"---- Script has finished. ----")
     L.info(f"Run time: {format_time(time.time() - start_time)}")
     L.info(f"Results: ")
-    L.info(f"{rows} rows processed.")
-    L.info(f'{L.num_errors} errors occurred')
+    L.info(f"{len(rows)} rows processed.")
+    L.info(f'{L.num_errors} errors occurred:')
     L.print_error_messages()
